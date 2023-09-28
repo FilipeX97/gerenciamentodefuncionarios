@@ -93,7 +93,8 @@ public class FuncionarioService {
 	}
 	
 	public List<Funcionario> exibirListaOrdenada() {
-		List<Funcionario> listaOrdenada = listaFuncionario;
+		List<Funcionario> listaOrdenada = new ArrayList<Funcionario>();
+		listaOrdenada.addAll(listaFuncionario);
 		listaOrdenada.sort(Comparator.comparing(Funcionario::getNome));
 		return listaOrdenada;
 	}
@@ -128,6 +129,30 @@ public class FuncionarioService {
 		listaFuncionario.addAll(funcionarios);
 	}
 	
+	public void atualizarDadosFuncionario(String nome, LocalDate data_nascimento, Funcionario funcionario) {
+		Funcionario funcionarioNoSistema = listaFuncionario.stream()
+			.filter(
+					f -> f.getNome().equalsIgnoreCase(nome) &&
+					f.getData_nascimento().equals(data_nascimento)
+				)
+			.findFirst().orElse(null);
+			
+			if(funcionario != null) {
+				funcionarioNoSistema.setNome(
+						funcionario.getNome() == null || funcionario.getNome().isEmpty() ? funcionarioNoSistema.getNome() : funcionario.getNome());
+				funcionarioNoSistema.setData_nascimento(
+						funcionario.getData_nascimento() == null ? funcionarioNoSistema.getData_nascimento() : funcionario.getData_nascimento());
+				funcionarioNoSistema.setSalario(
+						funcionario.getSalario() == null ? funcionarioNoSistema.getSalario() : funcionario.getSalario());
+				funcionarioNoSistema.setFuncao(
+						funcionario.getFuncao() == null || funcionario.getFuncao().isEmpty() ? funcionarioNoSistema.getFuncao() : funcionario.getFuncao());
+				listaFuncionario.set(listaFuncionario.indexOf(funcionarioNoSistema), funcionarioNoSistema);
+				System.out.println("Funcionário(a) " + funcionario.getNome() + " atualizado(a) com sucesso!");
+			} else {
+				System.out.println("Funcionário não encontrado!");
+			}
+	}
+	
 	public void atualizarSalarioDeTodos(BigDecimal valorAumento) {
 		NumberFormat formatoPorcentagem = NumberFormat.getPercentInstance();
         String porcentagemFormatada = formatoPorcentagem.format(valorAumento.doubleValue() - 1.0);
@@ -152,7 +177,7 @@ public class FuncionarioService {
 				f -> f.getNome().equalsIgnoreCase(nome) &&
 				f.getData_nascimento().equals(data_nascimento)
 			)
-		.findFirst().get();
+		.findFirst().orElse(null);
 		
 		if(funcionario != null) {
 			funcionario.setSalario(funcionario.getSalario().multiply(valorAumento));
